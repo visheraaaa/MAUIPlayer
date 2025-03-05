@@ -1,9 +1,5 @@
 ﻿@page "/player"
 
-<p role="status">Current count: @currentTime</p>
-
-<button class="btn btn-primary" @onclick="Play">Click me</button>
-
 
 @if (songs == null)
 {
@@ -23,7 +19,7 @@ else
             {
                 <tr>
                     <td>@song.path</td>
-                    <td><button class="btn btn-primary" @onclick="Play">Play</button></td>
+                    <td><button class="btn btn-primary" @onclick="() => Play(song.path)">Play</button></td>
                 </tr>
             }
         </tbody>
@@ -51,9 +47,9 @@ else
     }
 
 
-    private async void Play()
+    private async void Play(string path)
     {
-        using (var audioFile = new AudioFileReader("C:\\Users\\alano\\Downloads\\Mitski - Washing Machine Heart.mp3"))
+        using (var audioFile = new AudioFileReader(path))
         using (var outputDevice = new WaveOutEvent())
         {
 
