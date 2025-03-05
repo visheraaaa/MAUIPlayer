@@ -1,0 +1,89 @@
+﻿@page "/player"
+
+<p role="status">Current count: @currentTime</p>
+
+<button class="btn btn-primary" @onclick="Play">Click me</button>
+
+
+@if (songs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Path</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var song in songs)
+            {
+                <tr>
+                    <td>@song.path</td>
+                    <button class="btn btn-primary" @onclick="Play">Play</button>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private string currentTime = "00:00";
+
+    public List<Song> songs = new List<Song>();
+    public string searchPath = "C:\\Users\\alano\\Music\\";
+
+    protected async override Task OnInitializedAsync()
+    {
+        string[] pathStrings = Directory.GetFiles(searchPath, "*.mp3");
+        Console.WriteLine(pathStrings);
+        
+        foreach(var path in pathStrings)
+        {
+            Song rightSong = new Song{ path =  path };
+            songs.Add(rightSong);
+            
+        }
+    }
+
+
+    private async void Play()
+    {
+        using (var audioFile = new AudioFileReader("C:\\Users\\alano\\Downloads\\Mitski - Washing Machine Heart.mp3"))
+        using (var outputDevice = new WaveOutEvent())
+        {
+
+            var fade = new FadeInOutSampleProvider(audioFile, true);
+
+            fade.BeginFadeIn(2000);
+            
+            outputDevice.Init(fade);
+            outputDevice.Volume = 0.2f;
+            outputDevice.Play();
+
+
+            Task task = new Task(() =>
+            {
+                while (outputDevice.PlaybackState == PlaybackState.Playing)
+                {
+                    currentTime = audioFile.CurrentTime.ToString("mm':'ss");
+                    Task.Delay(10).Wait();
+
+                }
+            });
+            await task;
+        }
+    }
+
+    public class Song
+    {
+        public string path;
+        //some other staff here
+    }
+
+}
+
